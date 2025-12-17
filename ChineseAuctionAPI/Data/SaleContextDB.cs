@@ -6,7 +6,7 @@ namespace ChineseAuctionAPI.Data
     public class SaleContextDB:DbContext
     {
         public SaleContextDB(DbContextOptions<SaleContextDB> options) : base(options) { }
-        public DbSet<Buyer> Buyers => Set<Buyer>();
+        public DbSet<User> Users => Set<User>();
         public DbSet<Gift> Gifts => Set<Gift>();
         public  DbSet<Donor> Donors => Set<Donor>();
         public DbSet<OrdersGift> Orders => Set<OrdersGift>();
