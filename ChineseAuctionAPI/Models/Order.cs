@@ -3,20 +3,23 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ChineseAuctionAPI.Models
 {
+    public enum OrderStatus
+    {
+        Draft,
+        Completed,
+    }
+
     public class Order
     {
         [Key]
-
         public int IdOrder { get; set; }
-        public int IdBuyer { get; set; }
-        public User Buyer { get; set; }
-
-        public int IdPackage { get; set; }
-        public Package Package { get; set; }
-        public int Amount { get; set; } = 1;
+        public int IdUser { get; set; }
+        public User User { get; set; }
+        public ICollection<OrdersPackage> OrdersPackage { get; set; }
         public DateTime OrderDate { get; set; }
-        public bool IsStatusDraft { get; set; } = false;
-        public ICollection <OrdersGift> Orders { get; set; }
+        public OrderStatus IsStatusDraft { get; set; } = OrderStatus.Draft;
+        public ICollection <OrdersGift> OrdersGift { get; set; }
+        public int Price { get; set; } = 1;
 
     }
 }

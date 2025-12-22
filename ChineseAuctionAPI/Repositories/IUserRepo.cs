@@ -12,7 +12,5 @@ namespace ChineseAuctionAPI.Repositories
         Task<User?> GetByEmailAsync(string email);
         Task<bool> ExistEmailAsync(string email);
         Task<User?> GetUserWithOrdersAsync(int userId);
-        Task<User?> GetUserWithCardsAsync(int userId);
-
     }
 }

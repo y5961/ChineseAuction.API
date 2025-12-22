@@ -12,5 +12,6 @@ namespace ChineseAuctionAPI.Models
         public string Name { get; set; }
         public string? Description { get; set; }
         public ICollection<Card> Cards { get; set; }
+        public ICollection<OrdersPackage> OrdersPackage { get; set; }
     }
 }

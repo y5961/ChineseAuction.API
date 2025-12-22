@@ -12,6 +12,5 @@ namespace ChineseAuctionAPI.Models
         public int IdOrder { get; set; }
         public Order Order { get; set; } = null!;
         public int Amount { get; set; }
-
     }
 }

@@ -11,6 +11,8 @@ namespace ChineseAuctionAPI.Models
     {
         [Key]
         public int IdUser { get; set; }
+        public string PasswordHash { get; set; }
+
         public string Identity { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }

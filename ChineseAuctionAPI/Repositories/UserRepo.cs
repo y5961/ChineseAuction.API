@@ -15,9 +15,21 @@ namespace ChineseAuctionAPI.Repositories
         }
         public async Task<User> AddAsync(User user)
         {
-              _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-            return user;
+            try
+            {
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
+                return user;
+            }
+           catch  (DbUpdateException ex)
+            {
+
+                if (ex.InnerException?.Message != null && ex.InnerException.Message.Contains("IX_Users_Email"))
+                {
+                    throw new InvalidOperationException("Email already exists.", ex);
+                }
+                throw;
+            }
         }
 
         public async Task<bool> DeleteAsync(int id)
@@ -72,5 +84,7 @@ namespace ChineseAuctionAPI.Repositories
                 .Include(u => u.Cards)
                 .FirstOrDefaultAsync(u => u.IdUser == userId);
         }
+
+
     }
 }

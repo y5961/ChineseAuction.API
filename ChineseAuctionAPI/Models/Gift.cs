@@ -25,6 +25,7 @@ namespace ChineseAuctionAPI.Models
         public int IdDonor { get; set; }
         public Donor Donor { get; set; }
         public bool IsDrawn { get; set; } = false;
+        public int Price { get; set; }
         public ICollection<OrdersGift> OrdersGifts { get; set; }
     }
 }
