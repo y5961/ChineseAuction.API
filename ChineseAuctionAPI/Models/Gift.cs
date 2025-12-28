@@ -3,14 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ChineseAuctionAPI.Models
 {
-    public enum GiftCategory
-    {
-        Electronics,
-        HomeGoods,
-        Vacations,
-        Gewelry,
-        Other
-    }
+  
     public class Gift
     {
         [Key]
@@ -19,6 +12,7 @@ namespace ChineseAuctionAPI.Models
 
         public string Name { get; set; }
         public string? Description { get; set; }
+        public int CategoryId { get; set; }
         public GiftCategory Category { get; set; }
         public int Amount { get; set; } = 1;
         public string? Image { get; set; }

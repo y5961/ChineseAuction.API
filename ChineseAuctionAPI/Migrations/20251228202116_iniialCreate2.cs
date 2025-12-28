@@ -5,7 +5,7 @@
 namespace ChineseAuctionAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate4 : Migration
+    public partial class iniialCreate2 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

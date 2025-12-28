@@ -9,7 +9,7 @@ namespace ChineseAuctionAPI.Services
         Task<OrderDTO?> GetDraftOrderByUserAsync(int userId);
         //Task<OrderDTO> CreateDraftOrderAsync(int userId);
         Task<bool> AddOrUpdateGiftInOrderAsync(int orderId, int giftId, int amount);
-        Task<OrderItemDTO?> GetByIdWithGiftsAsync(int orderId);
+        Task<OrderDTO?> GetByIdWithGiftsAsync(int orderId);
         Task<bool> CompleteOrder(int orderId);
     }
 }

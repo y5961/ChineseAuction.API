@@ -29,6 +29,7 @@ namespace ChineseAuctionAPI.Services
         {
             return new UserDTO
             {
+                
                 Identity = u.Identity,
                 FirstName = u.FirstName,
                 LastName = u.LastName,
@@ -69,6 +70,7 @@ namespace ChineseAuctionAPI.Services
             try
             {
                 return await _userRepository.DeleteAsync(id);
+
             }
             catch (Exception ex)
             {
@@ -92,11 +94,13 @@ namespace ChineseAuctionAPI.Services
                         OrderDate = o.OrderDate,
                         IdUser = o.IdUser,
 
-                        OrderOne = o.OrdersGift.Select(ord => new OrderItemDTO
+                        OrdersGifts = o.OrdersGift.Select(ord => new OrdersGiftDTO
                         {
+                            Name = ord.Gift.Name,
                             Amount = ord.Amount,
-                            IdGift = ord.IdGift,
-                            //Price = ord.Price
+                            Price = ord.Gift.Price,
+                            Description = ord.Gift.Description,
+                            Image = ord.Gift.Image
                         }).ToList()
                     }).ToList() ?? new List<OrderDTO>()
                 };
@@ -109,39 +113,48 @@ namespace ChineseAuctionAPI.Services
 
 
         }
-      
+
 
         public async Task<string?> RegisterAsync(DtoLogin dto)
         {
-            if (dto == null) throw new ArgumentNullException(nameof(dto));
-            if (string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.Password))
-                return null;
-
-            var email = dto.Email.Trim();
-
-            if (await _userRepository.ExistEmailAsync(email))
-                return null;
-
-            var hashed = BCrypt.Net.BCrypt.HashPassword(dto.Password);
-
-            var newUser = new User
+            try
             {
-                Identity = dto.Identity,
-                FirstName = dto.FirstName,
-                LastName = dto.LastName,
-                PasswordHash = hashed,
-                Email = email,
-                PhoneNumber = dto.PhoneNumber,
-                City = dto.City,
-                Address = dto.Address,
-                Orders = new List<Order>(),
-                Cards = new List<Card>()
-            };
+                if (dto == null) throw new ArgumentNullException(nameof(dto));
+                if (string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.Password))
+                    return null;
 
-            var created = await _userRepository.AddAsync(newUser);
-            var token = GenerateJwtToken(created);
+                var email = dto.Email.Trim();
 
-            return token;
+                if (await _userRepository.ExistEmailAsync(email))
+                    return null;
+
+                var hashed = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+
+                var newUser = new User
+                {
+                    Identity = dto.Identity,
+                    FirstName = dto.FirstName,
+                    LastName = dto.LastName,
+                    PasswordHash = hashed,
+                    Email = email,
+                    PhoneNumber = dto.PhoneNumber,
+                    City = dto.City,
+                    Address = dto.Address,
+                    Orders = new List<Order>(),
+                    Cards = new List<Card>()
+                };
+
+                var created = await _userRepository.AddAsync(newUser);
+                var token = GenerateJwtToken(created);
+
+                return token;
+            }
+            catch (Exception ex)
+            {
+                // כאן מומלץ להוסיף רישום ללוג: _logger.LogError(ex, "Error registering new user");
+                throw new Exception("שגיאה בהרשמת משתמש חדש", ex);
+
+            }
         }
 
         public async Task<string> LoginAsync(string email, string password)
@@ -174,7 +187,8 @@ namespace ChineseAuctionAPI.Services
     {
         new Claim(ClaimTypes.NameIdentifier, user.IdUser.ToString()),
         new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
-        new Claim("isManager", user.IsManager.ToString().ToLower()) 
+        new Claim(ClaimTypes.Role, user.IsManager.ToString())
+        //new Claim("isManager", user.IsManager.ToString().ToLower()) 
     };
 
             var token = new JwtSecurityToken(

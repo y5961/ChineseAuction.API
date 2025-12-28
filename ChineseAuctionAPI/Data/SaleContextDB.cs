@@ -13,6 +13,7 @@ namespace ChineseAuctionAPI.Data
         public DbSet<Order> OrdersOrders => Set<Order>();
         public DbSet<Package> Packages => Set<Package>();
         public DbSet<OrdersPackage> OrdersPackage => Set<OrdersPackage>();
+        public DbSet<GiftCategory> GiftCategories => Set<GiftCategory>();
 
         public DbSet<Card> Cards => Set<Card>();
         public DbSet<Winner> winners => Set<Winner>();
@@ -26,7 +27,7 @@ namespace ChineseAuctionAPI.Data
 
             modelBuilder.Entity<Order>()
           .HasIndex(o => o.IdUser)
-          .HasFilter("[Status] = 0") // Status.Draft = 0 לפי enum
+          .HasFilter("[IsStatusDraft] = 0") // Status.Draft = 0 לפי enum
           .IsUnique();
 
         }

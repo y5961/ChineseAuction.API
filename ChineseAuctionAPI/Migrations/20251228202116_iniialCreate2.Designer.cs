@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ChineseAuctionAPI.Migrations
 {
     [DbContext(typeof(SaleContextDB))]
-    [Migration("20251217102216_InitialCreate2")]
-    partial class InitialCreate2
+    [Migration("20251228202116_iniialCreate2")]
+    partial class iniialCreate2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -54,7 +54,7 @@ namespace ChineseAuctionAPI.Migrations
 
                     b.HasIndex("UserIdUser");
 
-                    b.ToTable("Card");
+                    b.ToTable("Cards");
                 });
 
             modelBuilder.Entity("ChineseAuctionAPI.Models.Donor", b =>
@@ -97,7 +97,7 @@ namespace ChineseAuctionAPI.Migrations
                     b.Property<int>("Amount")
                         .HasColumnType("int");
 
-                    b.Property<int>("Category")
+                    b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
                     b.Property<string>("Description")
@@ -119,11 +119,33 @@ namespace ChineseAuctionAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("Price")
+                        .HasColumnType("int");
+
                     b.HasKey("IdGift");
+
+                    b.HasIndex("CategoryId");
 
                     b.HasIndex("DonorIdDonor");
 
                     b.ToTable("Gifts");
+                });
+
+            modelBuilder.Entity("ChineseAuctionAPI.Models.GiftCategory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("GiftCategories");
                 });
 
             modelBuilder.Entity("ChineseAuctionAPI.Models.Order", b =>
@@ -134,34 +156,30 @@ namespace ChineseAuctionAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdOrder"));
 
-                    b.Property<int>("Amount")
+                    b.Property<int>("IdUser")
                         .HasColumnType("int");
 
-                    b.Property<int>("BuyerIdUser")
+                    b.Property<int>("IsStatusDraft")
                         .HasColumnType("int");
-
-                    b.Property<int>("IdBuyer")
-                        .HasColumnType("int");
-
-                    b.Property<int>("IdPackage")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsStatusDraft")
-                        .HasColumnType("bit");
 
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("PackageIdPackage")
+                    b.Property<int>("Price")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserIdUser")
                         .HasColumnType("int");
 
                     b.HasKey("IdOrder");
 
-                    b.HasIndex("BuyerIdUser");
+                    b.HasIndex("IdUser")
+                        .IsUnique()
+                        .HasFilter("[IsStatusDraft] = 0");
 
-                    b.HasIndex("PackageIdPackage");
+                    b.HasIndex("UserIdUser");
 
-                    b.ToTable("Order");
+                    b.ToTable("OrdersOrders");
                 });
 
             modelBuilder.Entity("ChineseAuctionAPI.Models.OrdersGift", b =>
@@ -193,7 +211,36 @@ namespace ChineseAuctionAPI.Migrations
 
                     b.HasIndex("OrderIdOrder");
 
-                    b.ToTable("Orders");
+                    b.ToTable("OrdersGift");
+                });
+
+            modelBuilder.Entity("ChineseAuctionAPI.Models.OrdersPackage", b =>
+                {
+                    b.Property<int>("IdPackageOrder")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdPackageOrder"));
+
+                    b.Property<int>("IdPackage")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PriceAtPurchase")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("IdPackageOrder");
+
+                    b.HasIndex("IdPackage");
+
+                    b.HasIndex("OrderId");
+
+                    b.ToTable("OrdersPackage");
                 });
 
             modelBuilder.Entity("ChineseAuctionAPI.Models.Package", b =>
@@ -242,7 +289,7 @@ namespace ChineseAuctionAPI.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -259,13 +306,21 @@ namespace ChineseAuctionAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("IdUser");
 
-                    b.ToTable("Buyers");
+                    b.HasIndex("Email")
+                        .IsUnique()
+                        .HasFilter("[Email] IS NOT NULL");
+
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("ChineseAuctionAPI.Models.Winner", b =>
@@ -300,32 +355,32 @@ namespace ChineseAuctionAPI.Migrations
 
             modelBuilder.Entity("ChineseAuctionAPI.Models.Gift", b =>
                 {
+                    b.HasOne("ChineseAuctionAPI.Models.GiftCategory", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("ChineseAuctionAPI.Models.Donor", "Donor")
                         .WithMany()
                         .HasForeignKey("DonorIdDonor")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Category");
+
                     b.Navigation("Donor");
                 });
 
             modelBuilder.Entity("ChineseAuctionAPI.Models.Order", b =>
                 {
-                    b.HasOne("ChineseAuctionAPI.Models.User", "Buyer")
+                    b.HasOne("ChineseAuctionAPI.Models.User", "User")
                         .WithMany("Orders")
-                        .HasForeignKey("BuyerIdUser")
+                        .HasForeignKey("UserIdUser")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ChineseAuctionAPI.Models.Package", "Package")
-                        .WithMany()
-                        .HasForeignKey("PackageIdPackage")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Buyer");
-
-                    b.Navigation("Package");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("ChineseAuctionAPI.Models.OrdersGift", b =>
@@ -337,7 +392,7 @@ namespace ChineseAuctionAPI.Migrations
                         .IsRequired();
 
                     b.HasOne("ChineseAuctionAPI.Models.Order", "Order")
-                        .WithMany("Orders")
+                        .WithMany("OrdersGift")
                         .HasForeignKey("OrderIdOrder")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -347,6 +402,25 @@ namespace ChineseAuctionAPI.Migrations
                     b.Navigation("Order");
                 });
 
+            modelBuilder.Entity("ChineseAuctionAPI.Models.OrdersPackage", b =>
+                {
+                    b.HasOne("ChineseAuctionAPI.Models.Package", "Package")
+                        .WithMany("OrdersPackage")
+                        .HasForeignKey("IdPackage")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ChineseAuctionAPI.Models.Order", "Order")
+                        .WithMany("OrdersPackage")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Package");
+                });
+
             modelBuilder.Entity("ChineseAuctionAPI.Models.Gift", b =>
                 {
                     b.Navigation("OrdersGifts");
@@ -354,12 +428,16 @@ namespace ChineseAuctionAPI.Migrations
 
             modelBuilder.Entity("ChineseAuctionAPI.Models.Order", b =>
                 {
-                    b.Navigation("Orders");
+                    b.Navigation("OrdersGift");
+
+                    b.Navigation("OrdersPackage");
                 });
 
             modelBuilder.Entity("ChineseAuctionAPI.Models.Package", b =>
                 {
                     b.Navigation("Cards");
+
+                    b.Navigation("OrdersPackage");
                 });
 
             modelBuilder.Entity("ChineseAuctionAPI.Models.User", b =>
