@@ -1,75 +1,99 @@
-﻿
+﻿using Azure.Core;
+using global::ChineseAuctionAPI.DTOs;
+using global::ChineseAuctionAPI.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
-    using global::ChineseAuctionAPI.DTOs;
-    using global::ChineseAuctionAPI.Services;
-    using Microsoft.AspNetCore.Mvc;
-
-    namespace ChineseAuctionAPI.Controllers
+namespace ChineseAuctionAPI.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class OrdersController : ControllerBase
     {
-        [ApiController]
-        [Route("api/[controller]")]
-        public class OrdersController : ControllerBase
+        private readonly IOrderService _orderService;
+        private readonly ILogger<OrdersController> _logger;
+
+        public OrdersController(IOrderService orderService, ILogger<OrdersController> logger)
         {
-            private readonly IOrderService _orderService;
+            _orderService = orderService;
+            _logger = logger;
+        }
 
-            public OrdersController(IOrderService orderService)
+        // GET: api/orders/user/5
+        [HttpGet("user/{userId}")]
+        public async Task<ActionResult<IEnumerable<OrderDTO>>> GetAll(int userId)
+        {
+            try
             {
-                _orderService = orderService;
-            }
-
-            // GET: api/orders/user/5
-            [HttpGet("user/{userId}")]
-            public async Task<ActionResult<IEnumerable<OrderDTO>>> GetAll(int userId)
-            {
+                _logger.LogInformation("Fetching all orders for user ID: {UserId}", userId);
                 var orders = await _orderService.GetAllAsync(userId);
                 return Ok(orders);
             }
-
-            // GET: api/orders/5
-            [HttpGet("{orderId}")]
-            public async Task<ActionResult<OrderDTO>> GetById(int orderId)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Error fetching orders for user ID: {UserId}", userId);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        // GET: api/orders/5
+        [HttpGet("{orderId}")]
+        public async Task<ActionResult<OrderDTO>> GetById(int orderId)
+        {
+            try
+            {
+                _logger.LogInformation("Fetching order details for order ID: {OrderId}", orderId);
                 var order = await _orderService.GetByIdWithGiftsAsync(orderId);
-                if (order == null) return NotFound();
+                if (order == null)
+                {
+                    _logger.LogWarning("Order ID: {OrderId} not found", orderId);
+                    return NotFound();
+                }
                 return Ok(order);
             }
-
-            // GET: api/orders/draft/5
-            [HttpGet("draft/{userId}")]
-            public async Task<ActionResult<OrderDTO>> GetDraft(int userId)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Error fetching order ID: {OrderId}", orderId);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        // GET: api/orders/draft/5
+        [HttpGet("draft/{userId}")]
+        public async Task<ActionResult<OrderDTO>> GetDraft(int userId)
+        {
+            try
+            {
+                _logger.LogInformation("Fetching draft order for user ID: {UserId}", userId);
                 var draft = await _orderService.GetDraftOrderByUserAsync(userId);
-                if (draft == null) return NotFound();
+                if (draft == null)
+                {
+                    _logger.LogWarning("No draft order found for user ID: {UserId}", userId);
+                    return NotFound();
+                }
                 return Ok(draft);
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching draft order for user ID: {UserId}", userId);
+                return StatusCode(500, "Internal server error");
+            }
+        }
 
-            // POST: api/orders/add-gift
-            [HttpPost("add-gift")]
-            public async Task<ActionResult> AddOrUpdateGift([FromQuery] int orderId, [FromQuery] int giftId, [FromQuery] int amount)
+        // POST: api/orders/add-gift
+        [HttpPost("add-gift")]
+        public async Task<ActionResult> AddOrUpdateGift([FromQuery] int orderId, [FromQuery] int giftId, [FromQuery] int amount)
+        {
+            try
             {
                 var result = await _orderService.AddOrUpdateGiftInOrderAsync(orderId, giftId, amount);
-                if (result) return Ok();
-                return BadRequest();
+                if (result) return Ok("הסל עודכן בהצלחה.");
+                return BadRequest("שגיאה בעדכון הסל.");
             }
-
-            // DELETE: api/orders/delete-gift
-            [HttpDelete("delete-gift")]
-            public async Task<ActionResult> DeleteGift([FromQuery] int orderId, [FromQuery] int giftId, [FromQuery] int amount)
+            catch (Exception ex)
             {
-                var result = await _orderService.DeleteAsync(orderId, giftId, amount);
-                if (result) return Ok();
-                return BadRequest();
-            }
-
-            // POST: api/orders/complete/5
-            [HttpPost("complete/{orderId}")]
-            public async Task<ActionResult> CompleteOrder(int orderId)
-            {
-                var result = await _orderService.CompleteOrder(orderId);
-                if (result) return Ok();
-                return BadRequest();
+                return StatusCode(500, ex.Message);
             }
         }
     }
-
-
+}

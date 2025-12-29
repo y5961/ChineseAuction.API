@@ -8,9 +8,12 @@
     {
         private readonly SaleContextDB _context;
 
+
+
         public GiftCategoryRepo(SaleContextDB context)
         {
             _context = context;
+
         }
 
         public async Task<List<GiftCategory>> GetAllAsync()

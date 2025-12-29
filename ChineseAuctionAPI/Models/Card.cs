@@ -7,7 +7,8 @@ namespace ChineseAuctionAPI.Models
         [Key]
         public int IdCard { get; set; }
         public int IdGift { get; set; }
-        public int IdBuyer { get; set; }
+        [Required]
+        public int IdUser { get; set; }
         public int Price { get; set; }
     }
 }

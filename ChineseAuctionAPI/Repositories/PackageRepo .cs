@@ -7,8 +7,12 @@ namespace ChineseAuctionAPI.Repositories
     public class PackageRepo : IPackageRepo
     {
         private readonly SaleContextDB _context;
-        public PackageRepo(SaleContextDB context) => _context = context;
 
+        public PackageRepo(SaleContextDB context)
+        {
+            _context = context;
+
+        }
         public async Task<IEnumerable<Package>> GetAllAsync() =>
             await _context.Packages.Include(p => p.Cards).ToListAsync();
 

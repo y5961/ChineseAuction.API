@@ -1,32 +1,35 @@
 ﻿using ChineseAuctionAPI.DTOs;
 using ChineseAuctionAPI.Repositories;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 
 namespace ChineseAuctionAPI.Services
 {
     public class OrderService : IOrderService
     {
         private readonly IOrderRepo _OrderRepository;
-        //private readonly ILogger<UserService> _logger;
+        private readonly ILogger<OrderService> _logger;
         private readonly IConfiguration _config;
 
-        public OrderService(IOrderRepo OrderRepository, IConfiguration config)//, ILogger<UserService> logger
+        public OrderService(IOrderRepo OrderRepository, IConfiguration config, ILogger<OrderService> logger)
         {
             _OrderRepository = OrderRepository;
-            //_logger = logger;
+            _logger = logger;
             _config = config;
         }
+
         public async Task<bool> AddOrUpdateGiftInOrderAsync(int orderId, int giftId, int amount)
         {
             try
             {
-                await AddOrUpdateGiftInOrderAsync(amount, orderId, giftId);
+                _logger.LogInformation("מעדכן/מוסיף מתנה {GiftId} להזמנה {OrderId} בכמות {Amount}.", giftId, orderId, amount);
+                await _OrderRepository.AddOrUpdateGiftInOrderAsync(amount, orderId, giftId);
                 return true;
             }
-
             catch (Exception ex)
             {
-                // כאן מומלץ להוסיף רישום ללוג: _logger.LogError(ex, "Error fetching user with ID {Id}", id);
-                throw new Exception("Error adding or updating gift in order", ex);
+                _logger.LogError(ex, "שגיאה בעת עדכון מתנה {GiftId} בהזמנה {OrderId}.", giftId, orderId);
+                throw;
             }
         }
 
@@ -34,14 +37,15 @@ namespace ChineseAuctionAPI.Services
         {
             try
             {
+                _logger.LogInformation("מנסה לסגור (Complete) הזמנה שמספרה {OrderId}.", orderId);
                 await _OrderRepository.CompleteOrder(orderId);
+                _logger.LogInformation("הזמנה {OrderId} נסגרה בהצלחה.", orderId);
                 return true;
-
             }
             catch (Exception ex)
             {
-                // כאן מומלץ להוסיף רישום ללוג: _logger.LogError(ex, "Error fetching user with ID {Id}", id);
-                throw new Exception("Error completing order", ex);
+                _logger.LogError(ex, "נכשלה סגירת הזמנה {OrderId}.", orderId);
+                throw;
             }
         }
 
@@ -49,12 +53,14 @@ namespace ChineseAuctionAPI.Services
         {
             try
             {
-                return await _OrderRepository.DeleteAsync(orderId, giftId, amount);
+                _logger.LogInformation("מוחק {Amount} יחידות של מתנה {GiftId} מהזמנה {OrderId}.", amount, giftId, orderId);
+                var result = await _OrderRepository.DeleteAsync(orderId, giftId, amount);
+                return result;
             }
             catch (Exception ex)
             {
-                // כאן מומלץ להוסיף רישום ללוג: _logger.LogError(ex, "Error fetching user with ID {Id}", id);
-                throw new Exception("Error deleting gift from order", ex);
+                _logger.LogError(ex, "שגיאה במחיקת מתנה מהזמנה {OrderId}.", orderId);
+                throw;
             }
         }
 
@@ -62,16 +68,15 @@ namespace ChineseAuctionAPI.Services
         {
             try
             {
+                _logger.LogInformation("שולף את כל ההזמנות עבור משתמש {UserId}.", userId);
                 var orders = await _OrderRepository.GetAllOrder(userId);
+
                 var ordersDto = orders.Select(o => new OrderDTO
                 {
                     IdUser = o.IdUser,
                     OrderDate = o.OrderDate,
                     IsStatusDraft = o.IsStatusDraft,
-
-                    // אם Amount מייצג כמות מתנות:
                     Amount = o.OrdersGift.Sum(og => og.Amount),
-
                     OrdersGifts = o.OrdersGift.Select(og => new OrdersGiftDTO
                     {
                         Name = og.Gift.Name,
@@ -86,8 +91,8 @@ namespace ChineseAuctionAPI.Services
             }
             catch (Exception ex)
             {
-                // כאן מומלץ להוסיף רישום ללוג: _logger.LogError(ex, "Error fetching user with ID {Id}", id);
-                throw new Exception("Error fetching all orders for user", ex);
+                _logger.LogError(ex, "שגיאה בשליפת הזמנות למשתמש {UserId}.", userId);
+                throw;
             }
         }
 
@@ -95,15 +100,19 @@ namespace ChineseAuctionAPI.Services
         {
             try
             {
+                _logger.LogInformation("שולף פרטי הזמנה {OrderId} כולל פירוט מתנות.", orderId);
                 var order = await _OrderRepository.GetByIdWithGiftsAsync(orderId);
-                if (order == null)
-                    return null;
 
-                var orderDto = new OrderDTO
+                if (order == null)
+                {
+                    _logger.LogWarning("הזמנה {OrderId} לא נמצאה.", orderId);
+                    return null;
+                }
+
+                return new OrderDTO
                 {
                     OrderDate = order.OrderDate,
                     IsStatusDraft = order.IsStatusDraft,
-
                     OrdersGifts = order.OrdersGift.Select(og => new OrdersGiftDTO
                     {
                         Name = og.Gift.Name,
@@ -113,53 +122,46 @@ namespace ChineseAuctionAPI.Services
                         Price = og.Gift.Price,
                         Image = og.Gift.Image
                     }).ToList(),
-
                     TotalAmount = order.OrdersGift.Sum(og => og.Amount),
                     TotalPrice = order.OrdersGift.Sum(og => og.Amount * og.Gift.Price)
                 };
-
-                return orderDto;
             }
             catch (Exception ex)
             {
-                throw new Exception("Error fetching order by ID with gifts", ex);
+                _logger.LogError(ex, "שגיאה בשליפת הזמנה {OrderId} עם מתנות.", orderId);
+                throw;
             }
         }
 
-
-        public Task<OrderDTO?> GetDraftOrderByUserAsync(int userId)
+        public async Task<OrderDTO?> GetDraftOrderByUserAsync(int userId)
         {
             try
             {
-                return _OrderRepository.GetDraftOrderByUserAsync(userId)
-                    .ContinueWith(task =>
+                _logger.LogInformation("מחפש הזמנה במצב טיוטה (Draft) עבור משתמש {UserId}.", userId);
+                var order = await _OrderRepository.GetDraftOrderByUserAsync(userId);
+
+                if (order == null) return null;
+
+                return new OrderDTO
+                {
+                    IdUser = order.IdUser,
+                    OrderDate = order.OrderDate,
+                    IsStatusDraft = order.IsStatusDraft,
+                    OrdersGifts = order.OrdersGift.Select(og => new OrdersGiftDTO
                     {
-                        var order = task.Result;
-                        if (order == null)
-                            return null;
-                        var orderDto = new OrderDTO
-                        {
-                            IdUser = order.IdUser,
-                            OrderDate = order.OrderDate,
-                            IsStatusDraft = order.IsStatusDraft,
-                            OrdersGifts = order.OrdersGift.Select(og => new OrdersGiftDTO
-                            {
-                                Name = og.Gift.Name,
-                                Amount = og.Amount,
-                                Price = og.Gift.Price,
-                                Description = og.Gift.Description,
-                                Image = og.Gift.Image
-                            }).ToList()
-                        };
-                        return orderDto;
-                    });
+                        Name = og.Gift.Name,
+                        Amount = og.Amount,
+                        Price = og.Gift.Price,
+                        Description = og.Gift.Description,
+                        Image = og.Gift.Image
+                    }).ToList()
+                };
             }
             catch (Exception ex)
             {
-                throw new Exception("Error fetching draft order for user", ex);
+                _logger.LogError(ex, "שגיאה בשליפת טיוטת הזמנה למשתמש {UserId}.", userId);
+                throw;
             }
         }
-
-   
     }
 }

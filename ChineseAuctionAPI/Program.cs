@@ -77,6 +77,10 @@ builder.Services.AddSwaggerGen(c =>
 // User
 builder.Services.AddScoped<IUserRepo, UserRepo>();
 builder.Services.AddScoped<IUserService, UserService>();
+// Order
+builder.Services.AddScoped<IOrderRepo, OrderRepo>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+
 
 // GiftCategory
 builder.Services.AddScoped<IGiftCategoryRepo, GiftCategoryRepo>();
@@ -85,6 +89,10 @@ builder.Services.AddScoped<IGiftCategoryService, GiftCategoryService>();
 // Gift
 builder.Services.AddScoped<IGiftRepo, GiftRepo>();
 builder.Services.AddScoped<IGiftService, GiftService>();
+
+// Donor
+builder.Services.AddScoped<IDonorRepository, DonorRepository>();
+builder.Services.AddScoped<IDonorService, DonorService>();
 
 // ===== DbContext =====
 var connectionString = builder.Configuration.GetConnectionString("ConnectionString");

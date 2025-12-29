@@ -4,29 +4,29 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChineseAuctionAPI.Repositories
 {
-    using ChineseAuctionAPI.Data;
-    using ChineseAuctionAPI.Models;
-    using Microsoft.EntityFrameworkCore;
-
     public class GiftRepo : IGiftRepo
     {
         private readonly SaleContextDB _context;
-        private readonly IConfiguration _config;
 
-        public GiftRepo(SaleContextDB context, IConfiguration config)
+        public GiftRepo(SaleContextDB context)
         {
             _context = context;
-            _config = config;
         }
 
         public async Task<IEnumerable<Gift>> GetAllAsync()
         {
-            return await _context.Gifts.Include(g => g.Category).Include(g => g.Donor).ToListAsync();
+            return await _context.Gifts
+                .Include(g => g.Category)
+                .Include(g => g.Donor)
+                .ToListAsync();
         }
+
         public async Task<Gift?> GetByIdAsync(int id)
         {
-            return await _context.Gifts.Include(g => g.Category).Include(g => g.Donor)
-                                .FirstOrDefaultAsync(g => g.IdGift == id);
+            return await _context.Gifts
+                .Include(g => g.Category)
+                .Include(g => g.Donor)
+                .FirstOrDefaultAsync(g => g.IdGift == id);
         }
 
         public async Task<Gift> AddAsync(Gift gift)
@@ -45,10 +45,11 @@ namespace ChineseAuctionAPI.Repositories
         public async Task<bool> DeleteAsync(int id)
         {
             var gift = await _context.Gifts.FindAsync(id);
-            if (gift == null) return false;
+            if (gift == null)
+                return false;
+
             _context.Gifts.Remove(gift);
             return await _context.SaveChangesAsync() > 0;
         }
     }
-
 }
