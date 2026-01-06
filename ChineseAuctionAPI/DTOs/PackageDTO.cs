@@ -1,19 +1,28 @@
-﻿namespace ChineseAuctionAPI.DTOs
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace ChineseAuctionAPI.DTOs
 {
     public class PackageDTO
     {
+        [Required]
         public int IdPackage { get; set; }
-        public string Name { get; set; }
-        public string? Description { get; set; }
         public int AmountRegular { get; set; }
         public int? AmountPremium { get; set; }
+        [Required,Range(0,int.MaxValue)]
         public int Price { get; set; }
-        public List<CardDTO> Cards { get; set; } = new();
+        [Required]
+        public string Name { get; set; }
+        public string? Description { get; set; }
     }
 
-    public class CardDTO
+    public class PackageCreateDTO
     {
-        public int IdCard { get; set; }
+        [Required]
+        public int AmountRegular { get; set; }
+        public int? AmountPremium { get; set; }
+        [Required, Range(0, int.MaxValue)]
+        public int Price { get; set; }
+        [Required]
         public string Name { get; set; }
         public string? Description { get; set; }
     }

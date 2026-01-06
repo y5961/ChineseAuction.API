@@ -11,5 +11,8 @@ namespace ChineseAuctionAPI.Repositories
         Task UpdateAsync(Donor donor);
         Task DeleteAsync(int id);
         Task<IEnumerable<Gift>>? GetGiftsAsync(int DonorId);
+        Task<Donor> SortByGift(string donor);
+        Task<IEnumerable<Donor?>> SortByEmail(string email);
+        Task<IEnumerable<Donor?>> SortByName(string name);
     }
 }

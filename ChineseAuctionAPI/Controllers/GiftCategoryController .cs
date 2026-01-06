@@ -1,5 +1,6 @@
 ﻿using global::ChineseAuctionAPI.DTOs;
 using global::ChineseAuctionAPI.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -58,6 +59,8 @@ namespace ChineseAuctionAPI.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Manager")]
+
         public async Task<IActionResult> Create(CreateGiftCategoryDTO dto)
         {
             try
@@ -76,6 +79,8 @@ namespace ChineseAuctionAPI.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Manager")]
+
         public async Task<IActionResult> Update(int id, UpdateGiftCategoryDTO dto)
         {
             try
@@ -99,6 +104,8 @@ namespace ChineseAuctionAPI.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Manager")]
+
         public async Task<IActionResult> Delete(int id)
         {
             try

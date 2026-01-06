@@ -1,4 +1,5 @@
-﻿using ChineseAuctionAPI.DTOs;
+﻿using System.Drawing;
+using ChineseAuctionAPI.DTOs;
 using ChineseAuctionAPI.Models;
 using ChineseAuctionAPI.Repositories;
 using Microsoft.Extensions.Logging;
@@ -159,6 +160,45 @@ namespace ChineseAuctionAPI.Services
             catch (Exception ex)
             {
                 throw new Exception("שגיאה בשליפת המתנות עבור התורם", ex);
+            }
+        }
+
+        public async Task<Donor?> SortByGift(string donor)
+        {
+            try
+            {
+                return await _repository.SortByGift(donor);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "שגיאה בלתי צפויה סינון מילה {word}.", donor);
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<Donor?>> SortByEmail(string email)
+        {
+            try
+            {
+                return await _repository.SortByEmail(email);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "שגיאה בלתי צפויה סינון מילה {email}.", email);
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<Donor?>> SortByName(string name)
+        {
+            try
+            {
+                return await _repository.SortByName(name);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "שגיאה בלתי צפויה סינון מילה {email}.", name);
+                throw;
             }
         }
     }

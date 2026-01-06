@@ -1,14 +1,13 @@
 ﻿using ChineseAuctionAPI.DTOs;
-using ChineseAuctionAPI.Models;
 
 namespace ChineseAuctionAPI.Services
 {
     public interface IPackageService
     {
-        Task<IEnumerable<PackageDTO>> GetAllAsync();
-        Task<PackageDTO?> GetByIdAsync(int id);
-        Task AddAsync(Package package);
-        Task UpdateAsync(Package package);
-        Task DeleteAsync(int id);
+        Task<IEnumerable<PackageDTO>> GetAllPackagesAsync();
+        Task<PackageDTO?> GetPackageByIdAsync(int id);
+        Task<int> CreatePackageAsync(PackageCreateDTO dto);
+        Task UpdatePackageAsync(int id, PackageCreateDTO dto);
+        Task DeletePackageAsync(int id);
     }
 }

@@ -1,52 +1,61 @@
-﻿//using ChineseAuctionAPI.DTOs;
-//using ChineseAuctionAPI.Models;
-//using ChineseAuctionAPI.Services;
-//using Microsoft.AspNetCore.Mvc;
+﻿using ChineseAuctionAPI.DTOs;
+using ChineseAuctionAPI.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
-//namespace ChineseAuctionAPI.Controllers
-//{
-//    [ApiController]
-//    [Route("api/[controller]")]
-//    public class PackagesController : ControllerBase
-//    {
-//        private readonly PackageService _packageService;
-//        public PackagesController(PackageService packageService) => _packageService = packageService;
+namespace ChineseAuctionAPI.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    
+    public class PackagesController : ControllerBase
+    {
+        private readonly IPackageService _service;
+        private readonly ILogger<PackagesController> _logger;
 
-//        [HttpGet]
-//        public async Task<ActionResult<IEnumerable<PackageDTO>>> GetAll()
-//        {
-//            var packages = await _packageService.GetAllAsync();
-//            return Ok(packages);
-//        }
+        public PackagesController(IPackageService service, ILogger<PackagesController> logger)
+        {
+            _service = service;
+            _logger = logger;
+        }
 
-//        [HttpGet("{id}")]
-//        public async Task<ActionResult<PackageDTO>> GetById(int id)
-//        {
-//            var package = await _packageService.GetByIdAsync(id);
-//            if (package == null) return NotFound();
-//            return Ok(package);
-//        }
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<PackageDTO>>> GetAll()
+        {
+            var packages = await _service.GetAllPackagesAsync();
+            return Ok(packages);
+        }
 
-//        [HttpPost]
-//        public async Task<IActionResult> Create(Package package)
-//        {
-//            await _packageService.AddAsync(package);
-//            return CreatedAtAction(nameof(GetById), new { id = package.IdPackage }, package);
-//        }
+        [HttpGet("{id}")]
+        public async Task<ActionResult<PackageDTO>> Get(int id)
+        {
+            var package = await _service.GetPackageByIdAsync(id);
+            if (package == null) return NotFound();
+            return Ok(package);
+        }
 
-//        [HttpPut("{id}")]
-//        public async Task<IActionResult> Update(int id, Package package)
-//        {
-//            if (id != package.IdPackage) return BadRequest();
-//            await _packageService.UpdateAsync(package);
-//            return NoContent();
-//        }
+        [HttpPost]
+        [Authorize(Roles = "Manager")]
+        public async Task<ActionResult<int>> Create(PackageCreateDTO dto)
+        {
+            var id = await _service.CreatePackageAsync(dto);
+            return CreatedAtAction(nameof(Get), new { id }, id);
+        }
 
-//        [HttpDelete("{id}")]
-//        public async Task<IActionResult> Delete(int id)
-//        {
-//            await _packageService.DeleteAsync(id);
-//            return NoContent();
-//        }
-//    }
-//}
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Manager")]
+        public async Task<IActionResult> Update(int id, PackageCreateDTO dto)
+        {
+            await _service.UpdatePackageAsync(id, dto);
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "Manager")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            await _service.DeletePackageAsync(id);
+            return NoContent();
+        }
+    }
+}

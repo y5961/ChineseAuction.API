@@ -36,9 +36,6 @@ namespace ChineseAuctionAPI.Migrations
                     b.Property<int>("IdUser")
                         .HasColumnType("int");
 
-                    b.Property<int?>("PackageIdPackage")
-                        .HasColumnType("int");
-
                     b.Property<int>("Price")
                         .HasColumnType("int");
 
@@ -46,8 +43,6 @@ namespace ChineseAuctionAPI.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("IdCard");
-
-                    b.HasIndex("PackageIdPackage");
 
                     b.HasIndex("UserIdUser");
 
@@ -118,6 +113,9 @@ namespace ChineseAuctionAPI.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int?>("PackageIdPackage")
+                        .HasColumnType("int");
+
                     b.Property<int>("Price")
                         .HasColumnType("int");
 
@@ -128,6 +126,8 @@ namespace ChineseAuctionAPI.Migrations
                     b.HasIndex("IdDonor");
 
                     b.HasIndex("IdUser");
+
+                    b.HasIndex("PackageIdPackage");
 
                     b.ToTable("Gifts");
                 });
@@ -160,20 +160,20 @@ namespace ChineseAuctionAPI.Migrations
                     b.Property<int>("IdUser")
                         .HasColumnType("int");
 
-                    b.Property<int>("IsStatusDraft")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Price")
                         .HasColumnType("int");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
                     b.HasKey("IdOrder");
 
                     b.HasIndex("IdUser")
                         .IsUnique()
-                        .HasFilter("[IsStatusDraft] = 0");
+                        .HasFilter("[Status] = 0");
 
                     b.ToTable("OrdersOrders");
                 });
@@ -340,10 +340,6 @@ namespace ChineseAuctionAPI.Migrations
 
             modelBuilder.Entity("ChineseAuctionAPI.Models.Card", b =>
                 {
-                    b.HasOne("ChineseAuctionAPI.Models.Package", null)
-                        .WithMany("Cards")
-                        .HasForeignKey("PackageIdPackage");
-
                     b.HasOne("ChineseAuctionAPI.Models.User", null)
                         .WithMany("Cards")
                         .HasForeignKey("UserIdUser");
@@ -366,6 +362,10 @@ namespace ChineseAuctionAPI.Migrations
                     b.HasOne("ChineseAuctionAPI.Models.User", "user")
                         .WithMany()
                         .HasForeignKey("IdUser");
+
+                    b.HasOne("ChineseAuctionAPI.Models.Package", null)
+                        .WithMany("Gifts")
+                        .HasForeignKey("PackageIdPackage");
 
                     b.Navigation("Category");
 
@@ -456,7 +456,7 @@ namespace ChineseAuctionAPI.Migrations
 
             modelBuilder.Entity("ChineseAuctionAPI.Models.Package", b =>
                 {
-                    b.Navigation("Cards");
+                    b.Navigation("Gifts");
 
                     b.Navigation("OrdersPackage");
                 });

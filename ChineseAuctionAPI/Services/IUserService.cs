@@ -10,7 +10,7 @@ namespace ChineseAuctionAPI.Services
         Task<bool> DeleteAsync(int id);
         Task<DtoUserOrder?> GetUserWithOrdersAsync(int userId);
         Task<string> RegisterAsync(DtoLogin dto);
-        Task<string> LoginAsync(string email, string password);//Task<DtoLoginResponse?>
+        Task<string> LoginAsync(string email, string password);
 
     }
 }

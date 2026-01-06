@@ -19,7 +19,7 @@ namespace ChineseAuctionAPI.Controllers
             _logger = logger;
         }
 
-        // GET: api/orders/user/5
+        
         [HttpGet("user/{userId}")]
         public async Task<ActionResult<IEnumerable<OrderDTO>>> GetAll(int userId)
         {
@@ -36,7 +36,7 @@ namespace ChineseAuctionAPI.Controllers
             }
         }
 
-        // GET: api/orders/5
+      
         [HttpGet("{orderId}")]
         public async Task<ActionResult<OrderDTO>> GetById(int orderId)
         {
@@ -58,7 +58,7 @@ namespace ChineseAuctionAPI.Controllers
             }
         }
 
-        // GET: api/orders/draft/5
+       
         [HttpGet("draft/{userId}")]
         public async Task<ActionResult<OrderDTO>> GetDraft(int userId)
         {
@@ -80,13 +80,13 @@ namespace ChineseAuctionAPI.Controllers
             }
         }
 
-        // POST: api/orders/add-gift
+     
         [HttpPost("add-gift")]
-        public async Task<ActionResult> AddOrUpdateGift([FromQuery] int orderId, [FromQuery] int giftId, [FromQuery] int amount)
+        public async Task<ActionResult> AddOrUpdateGift([FromQuery] int userId, [FromQuery] int giftId, [FromQuery] int amount)
         {
             try
             {
-                var result = await _orderService.AddOrUpdateGiftInOrderAsync(orderId, giftId, amount);
+                var result = await _orderService.AddOrUpdateGiftInOrderAsync(userId, giftId, amount);
                 if (result) return Ok("הסל עודכן בהצלחה.");
                 return BadRequest("שגיאה בעדכון הסל.");
             }

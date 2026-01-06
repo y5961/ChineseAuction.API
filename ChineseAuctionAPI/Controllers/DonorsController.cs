@@ -101,4 +101,71 @@ public class DonorsController : ControllerBase
             return StatusCode(500, "Internal server error");
         }
     }
+
+    [HttpGet("sort/name/{name}")]
+
+    public async Task<IActionResult> SortByName(string name)
+    {
+        try
+        {
+            _logger.LogInformation("Attempting to retrieve donor with name: {name}", name);
+            var name1 = await _service.SortByName(name);
+
+            if (name1 == null)
+            {
+                _logger.LogWarning("donor with word: {name} not found.", name);
+
+            }
+            return Ok(name1);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while fetching donor with name: {name}", name);
+            return StatusCode(500, "Internal server error");
+        }
+    }
+    [HttpGet("sort/email/{email}")]
+
+    public async Task<IActionResult> SortByEmail(string email)
+    {
+        try
+        {
+            _logger.LogInformation("Attempting to retrieve donor with email: {email}", email);
+            var email1 = await _service.SortByEmail(email);
+
+            if (email1 == null)
+            {
+                _logger.LogWarning("donor with email: {email} not found.", email);
+
+            }
+            return Ok(email1);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while fetching donor with email: {email}", email);
+            return StatusCode(500, "Internal server error");
+        }
+    }
+    [HttpGet("sort/gift/{gift}")]
+
+    public async Task<IActionResult> SortByGift(string gift)
+    {
+        try
+        {
+            _logger.LogInformation("Attempting to retrieve donor with gift: {gift}", gift);
+            var gift1 = await _service.SortByGift(gift);
+
+            if (gift1 == null)
+            {
+                _logger.LogWarning("donor with gift: {gift} not found.", gift);
+
+            }
+            return Ok(gift1);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while fetching donor with gift: {gift}", gift);
+            return StatusCode(500, "Internal server error");
+        }
+    }
 }

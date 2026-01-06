@@ -8,7 +8,7 @@ namespace ChineseAuctionAPI.Services
         Task<bool> DeleteAsync(int orderId, int giftId, int amount);
         Task<OrderDTO?> GetDraftOrderByUserAsync(int userId);
         //Task<OrderDTO> CreateDraftOrderAsync(int userId);
-        Task<bool> AddOrUpdateGiftInOrderAsync(int orderId, int giftId, int amount);
+        Task<bool> AddOrUpdateGiftInOrderAsync(int userId, int giftId, int amount);
         Task<OrderDTO?> GetByIdWithGiftsAsync(int orderId);
         Task<bool> CompleteOrder(int orderId);
     }

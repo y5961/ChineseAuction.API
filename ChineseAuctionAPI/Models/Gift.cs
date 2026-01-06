@@ -30,7 +30,7 @@ namespace ChineseAuctionAPI.Models
         public int IdDonor { get; set; }
 
         [ForeignKey("IdDonor")]
-        public virtual Donor Donor { get; set; }
+        public  Donor Donor { get; set; }
 
         public bool IsDrawn { get; set; } = false;
 
@@ -43,6 +43,8 @@ namespace ChineseAuctionAPI.Models
         [Range(1, 10000, ErrorMessage = "המחיר חייב להיות בין 1 ל-10,000")]
         public int Price { get; set; }
 
-        public virtual ICollection<OrdersGift> OrdersGifts { get; set; }
+        public ICollection<OrdersGift> OrdersGifts { get; set; }
+       
+
     }
 }

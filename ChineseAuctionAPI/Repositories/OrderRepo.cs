@@ -15,48 +15,115 @@ namespace ChineseAuctionAPI.Repositories
 
         }
 
-        public async Task AddOrUpdateGiftInOrderAsync(int orderId, int giftId, int amount)
+        //public async Task AddOrUpdateGiftInOrderAsync(int orderId, int giftId, int amount)
+        //{
+        //    var gift = await _context.Gifts.FindAsync(giftId);
+        //    var order = await _context.OrdersOrders
+        //        .Include(o => o.OrdersGift)
+        //        .FirstOrDefaultAsync(o => o.IdOrder == orderId);
+
+        //    if (order == null)
+        //        throw new Exception("Order not found");
+
+        //    var orderGift = order.OrdersGift
+        //        .FirstOrDefault(go => go.IdGift == giftId);
+
+        //    if (orderGift != null)
+        //    {
+        //        // Update existing gift amount
+        //        orderGift.Amount = amount;
+        //        _context.OrdersGift.Update(orderGift);
+        //    }
+        //    else
+        //    {
+        //        // Add new gift to order
+        //        orderGift = new OrdersGift
+        //        {
+        //            IdOrder = orderId,
+        //            IdGift = giftId,
+        //            Amount = amount,
+        //        };
+        //        _context.OrdersGift.Add(orderGift);
+        //    }
+
+        //    order.Price = order.Price + gift.Price * amount;
+        //    await _context.SaveChangesAsync();
+        //}
+        //public async Task AddOrUpdateGiftInOrderAsync(int userId, int IdGift, int amount)
+        //{
+        //    var ord = await _context.OrdersOrders
+        //        .Include(o => o.OrdersGift)
+        //        .FirstOrDefaultAsync(o => o.IdUser == userId && o.Status == OrderStatus.Draft);
+
+        //    if (ord == null)
+        //        throw new InvalidOperationException("לא ניתן להוסיף מוצרים להזמנה סגורה או שאינה קיימת.");
+
+        //    var order = await _context.OrdersOrders
+        //   .Include(o => o.OrdersGift)
+        //    .FirstOrDefaultAsync(o => o.IdUser == userId && o.Status == OrderStatus.Draft);
+        //    if (order == null)
+        //    {
+        //        order = new Order
+        //        {
+        //            IdUser = userId,
+        //            Price = 0,
+        //            OrderDate = DateTime.Now,
+        //            Status = OrderStatus.Draft
+        //        };
+        //        _context.OrdersOrders.Add(order);
+        //        await _context.SaveChangesAsync();
+        //    }
+
+        //    var existing = ord.OrdersGift?.FirstOrDefault(go => go.IdGift == IdGift);
+        //}
+        public async Task AddOrUpdateGiftInOrderAsync(int userId, int IdGift, int amount)
         {
-            var gift = await _context.Gifts.FindAsync(giftId);
+            // 1. חיפוש הזמנה קיימת בטיוטה
             var order = await _context.OrdersOrders
                 .Include(o => o.OrdersGift)
-                .FirstOrDefaultAsync(o => o.IdOrder == orderId);
+                .FirstOrDefaultAsync(o => o.IdUser == userId && o.Status == OrderStatus.Draft);
 
+            // 2. אם לא קיימת, יוצרים אחת חדשה
             if (order == null)
-                throw new Exception("Order not found");
-
-            var orderGift = order.OrdersGift
-                .FirstOrDefault(go => go.IdGift == giftId);
-
-            if (orderGift != null)
             {
-                // Update existing gift amount
-                orderGift.Amount = amount;
-                _context.OrdersGift.Update(orderGift);
+                order = new Order
+                {
+                    IdUser = userId,
+                    Price = 0,
+                    OrderDate = DateTime.Now,
+                    Status = OrderStatus.Draft,
+                    OrdersGift = new List<OrdersGift>()
+                };
+               
+                _context.OrdersOrders.Add(order);
+                await _context.SaveChangesAsync();
+            }
+
+            // 3. הוספה או עדכון של המתנה בתוך ה-order שמצאנו/יצרנו
+            var existingGift = order.OrdersGift.FirstOrDefault(og => og.IdGift == IdGift);
+            if (existingGift != null)
+            {
+                existingGift.Amount = amount;
             }
             else
             {
-                // Add new gift to order
-                orderGift = new OrdersGift
+                order.OrdersGift.Add(new OrdersGift
                 {
-                    IdOrder = orderId,
-                    IdGift = giftId,
+                    IdGift = IdGift,
                     Amount = amount,
-                };
-                _context.OrdersGift.Add(orderGift);
+                    IdOrder = order.IdOrder
+                });
             }
 
-            order.Price = order.Price + gift.Price * amount;
             await _context.SaveChangesAsync();
         }
-
         public async Task<bool?> CompleteOrder(int orderId)
         {
             var order = await _context.OrdersOrders.FindAsync(orderId);
             if (order == null)
                 return null;
 
-            order.IsStatusDraft = OrderStatus.Completed;
+            order.Status = OrderStatus.Completed;
             await _context.SaveChangesAsync();
             return true;
         }
@@ -66,7 +133,7 @@ namespace ChineseAuctionAPI.Repositories
             var draftOrder = new Order
             {
                 IdUser = userId,
-                IsStatusDraft = OrderStatus.Draft,
+                Status = OrderStatus.Draft,
                 OrderDate = DateTime.UtcNow,
                 OrdersGift = new List<OrdersGift>()
             };
@@ -112,19 +179,28 @@ namespace ChineseAuctionAPI.Repositories
                 .FirstOrDefaultAsync(o => o.IdOrder == orderId);
         }
 
-        public async Task<IEnumerable<Order?>> GetAllOrder(int userId)
+        //public async Task<IEnumerable<Order?>> GetAllOrder(int userId)
+        //{
+        //    return await _context.OrdersOrders
+        //        .Where(o => o.IdUser == userId)
+        //        .ToListAsync();
+        //}
+      
+        public async Task<IEnumerable<Order>> GetAllOrder(int userId)
         {
             return await _context.OrdersOrders
                 .Where(o => o.IdUser == userId)
+                .Include(o => o.OrdersGift)
+                    .ThenInclude(og => og.Gift)
+                        .ThenInclude(g => g.Category)
                 .ToListAsync();
         }
-
         public async Task<Order?> GetDraftOrderByUserAsync(int userId)
         {
             return await _context.OrdersOrders
                 .Include(o => o.OrdersGift)
                 .ThenInclude(go => go.Gift)
-                .FirstOrDefaultAsync(o => o.IdUser == userId && o.IsStatusDraft == OrderStatus.Draft);
+                .FirstOrDefaultAsync(o => o.IdUser == userId && o.Status == OrderStatus.Draft);
         }
     }
 }

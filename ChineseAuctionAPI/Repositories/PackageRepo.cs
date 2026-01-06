@@ -4,31 +4,35 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChineseAuctionAPI.Repositories
 {
-    public class PackageRepo : IPackageRepo
+    public class PackageRepo: IPackageRepo
     {
         private readonly SaleContextDB _context;
 
         public PackageRepo(SaleContextDB context)
         {
             _context = context;
-
         }
-        public async Task<IEnumerable<Package>> GetAllAsync() =>
-            await _context.Packages.Include(p => p.Cards).ToListAsync();
 
-        public async Task<Package?> GetByIdAsync(int id) =>
-            await _context.Packages.Include(p => p.Cards)
-                                   .FirstOrDefaultAsync(p => p.IdPackage == id);
-
-        public async Task AddAsync(Package package)
+        public async Task<IEnumerable<Package>> GetAllAsync()
         {
-            _context.Packages.Add(package);
+            return await _context.Packages.ToListAsync();
+        }
+
+        public async Task<Package?> GetByIdAsync(int id)
+        {
+            return await _context.Packages.FindAsync(id);
+        }
+
+        public async Task<int> AddAsync(Package package)
+        {
+            await _context.Packages.AddAsync(package);
             await _context.SaveChangesAsync();
+            return package.IdPackage;
         }
 
         public async Task UpdateAsync(Package package)
         {
-            _context.Packages.Update(package);
+            _context.Entry(package).State = EntityState.Modified;
             await _context.SaveChangesAsync();
         }
 

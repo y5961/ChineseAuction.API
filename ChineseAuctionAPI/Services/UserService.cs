@@ -96,7 +96,7 @@ namespace ChineseAuctionAPI.Services
                     LastName = user.LastName,
                     Orders = user.Orders?.Select(o => new OrderDTO
                     {
-                        IsStatusDraft = o.IsStatusDraft,
+                        Status = o.Status,
                         OrderDate = o.OrderDate,
                         IdUser = o.IdUser,
                         OrdersGifts = o.OrdersGift.Select(ord => new OrdersGiftDTO

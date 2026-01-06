@@ -27,7 +27,7 @@ namespace ChineseAuctionAPI.Data
 
             modelBuilder.Entity<Order>()
           .HasIndex(o => o.IdUser)
-          .HasFilter("[IsStatusDraft] = 0") // Status.Draft = 0 לפי enum
+          .HasFilter("[Status] = 0") // Status.Draft = 0 לפי enum
           .IsUnique();
 
         }

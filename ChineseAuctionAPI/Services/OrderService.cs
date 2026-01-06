@@ -2,6 +2,7 @@
 using ChineseAuctionAPI.Repositories;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
+using ChineseAuctionAPI.Models;
 
 namespace ChineseAuctionAPI.Services
 {
@@ -17,18 +18,18 @@ namespace ChineseAuctionAPI.Services
             _logger = logger;
             _config = config;
         }
-
-        public async Task<bool> AddOrUpdateGiftInOrderAsync(int orderId, int giftId, int amount)
+       
+        public async Task<bool> AddOrUpdateGiftInOrderAsync(int userId, int giftId, int amount)
         {
             try
             {
-                _logger.LogInformation("מעדכן/מוסיף מתנה {GiftId} להזמנה {OrderId} בכמות {Amount}.", giftId, orderId, amount);
-                await _OrderRepository.AddOrUpdateGiftInOrderAsync(amount, orderId, giftId);
+                _logger.LogInformation("מעדכן/מוסיף מתנה {GiftId} להזמנה {OrderId} בכמות {Amount}.", giftId, userId, amount);
+                await _OrderRepository.AddOrUpdateGiftInOrderAsync(userId, giftId, amount);
                 return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "שגיאה בעת עדכון מתנה {GiftId} בהזמנה {OrderId}.", giftId, orderId);
+                _logger.LogError(ex, "שגיאה בעת עדכון מתנה {GiftId} בהזמנה {OrderId}.", giftId, userId);
                 throw;
             }
         }
@@ -73,19 +74,24 @@ namespace ChineseAuctionAPI.Services
 
                 var ordersDto = orders.Select(o => new OrderDTO
                 {
+                    
                     IdUser = o.IdUser,
                     OrderDate = o.OrderDate,
-                    IsStatusDraft = o.IsStatusDraft,
+                    Status = o.Status,
                     Amount = o.OrdersGift.Sum(og => og.Amount),
+                    TotalPrice = o.OrdersGift.Sum(go => go.Gift.Price),
+                    TotalAmount=o.OrdersGift.Sum(go=>go.Amount),
                     OrdersGifts = o.OrdersGift.Select(og => new OrdersGiftDTO
                     {
-                        Name = og.Gift.Name,
+                        Category=og.Gift.Category.Name,
+                        Name = og.Gift.Name ?? "",
                         Amount = og.Amount,
                         Price = og.Gift.Price,
                         Description = og.Gift.Description,
                         Image = og.Gift.Image
-                    }).ToList()
-                });
+                    })?.ToList(),
+                   
+                })?.ToList();
 
                 return ordersDto;
             }
@@ -112,12 +118,12 @@ namespace ChineseAuctionAPI.Services
                 return new OrderDTO
                 {
                     OrderDate = order.OrderDate,
-                    IsStatusDraft = order.IsStatusDraft,
+                    Status = order.Status,
                     OrdersGifts = order.OrdersGift.Select(og => new OrdersGiftDTO
                     {
                         Name = og.Gift.Name,
                         Description = og.Gift.Description,
-                        Category = og.Gift.Category,
+                        Category = og.Gift.Category.Name,
                         Amount = og.Amount,
                         Price = og.Gift.Price,
                         Image = og.Gift.Image
@@ -146,7 +152,7 @@ namespace ChineseAuctionAPI.Services
                 {
                     IdUser = order.IdUser,
                     OrderDate = order.OrderDate,
-                    IsStatusDraft = order.IsStatusDraft,
+                    Status = order.Status,
                     OrdersGifts = order.OrdersGift.Select(og => new OrdersGiftDTO
                     {
                         Name = og.Gift.Name,

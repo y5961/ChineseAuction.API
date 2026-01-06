@@ -6,7 +6,7 @@ namespace ChineseAuctionAPI.Repositories
     {
         Task<IEnumerable<Package>> GetAllAsync();
         Task<Package?> GetByIdAsync(int id);
-        Task AddAsync(Package package);
+        Task<int> AddAsync(Package package);
         Task UpdateAsync(Package package);
         Task DeleteAsync(int id);
     }

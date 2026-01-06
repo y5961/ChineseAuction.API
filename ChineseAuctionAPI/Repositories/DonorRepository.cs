@@ -52,4 +52,26 @@ public class DonorRepository : IDonorRepository
     {
         return await _context.Gifts.Where(go=>go.IdDonor== DonorId).Include(c=>c.Category).ToListAsync();
     }
+
+    public async Task<Donor> SortByGift(string donor)
+    {
+        var gift=await _context.Gifts.Include(g=>g.Donor).FirstOrDefaultAsync(g=>g.Name==donor);
+
+        return gift?.Donor;
+
+
+    }
+
+    public async Task<IEnumerable<Donor?>> SortByEmail(string email)
+    {
+        return await _context.Donors
+            .Where(d => d.Email.Contains(email)).ToListAsync();
+    }
+
+    public async Task<IEnumerable<Donor?>> SortByName(string name)
+    {
+        return await _context.Donors
+         .Where(d => d.FirstName.Contains(name) || d.LastName.Contains(name))
+         .ToListAsync();
+    }
 }

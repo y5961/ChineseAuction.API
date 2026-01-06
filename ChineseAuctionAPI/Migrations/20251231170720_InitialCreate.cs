@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ChineseAuctionAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class iniialCreate1 : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -31,13 +31,13 @@ namespace ChineseAuctionAPI.Migrations
                 name: "GiftCategories",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    IdGiftCategory = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_GiftCategories", x => x.Id);
+                    table.PrimaryKey("PK_GiftCategories", x => x.IdGiftCategory);
                 });
 
             migrationBuilder.CreateTable(
@@ -50,7 +50,7 @@ namespace ChineseAuctionAPI.Migrations
                     AmountPremium = table.Column<int>(type: "int", nullable: true),
                     Price = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -64,10 +64,10 @@ namespace ChineseAuctionAPI.Migrations
                     IdUser = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Identity = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Identity = table.Column<string>(type: "nvarchar(9)", maxLength: 9, nullable: false),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     City = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Address = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -76,6 +76,93 @@ namespace ChineseAuctionAPI.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.IdUser);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Cards",
+                columns: table => new
+                {
+                    IdCard = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    IdGift = table.Column<int>(type: "int", nullable: false),
+                    IdUser = table.Column<int>(type: "int", nullable: false),
+                    Price = table.Column<int>(type: "int", nullable: false),
+                    UserIdUser = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Cards", x => x.IdCard);
+                    table.ForeignKey(
+                        name: "FK_Cards_Users_UserIdUser",
+                        column: x => x.UserIdUser,
+                        principalTable: "Users",
+                        principalColumn: "IdUser");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Gifts",
+                columns: table => new
+                {
+                    IdGift = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    CategoryId = table.Column<int>(type: "int", nullable: false),
+                    Amount = table.Column<int>(type: "int", nullable: false),
+                    Image = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IdDonor = table.Column<int>(type: "int", nullable: false),
+                    IsDrawn = table.Column<bool>(type: "bit", nullable: false),
+                    IdUser = table.Column<int>(type: "int", nullable: true),
+                    Price = table.Column<int>(type: "int", nullable: false),
+                    PackageIdPackage = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Gifts", x => x.IdGift);
+                    table.ForeignKey(
+                        name: "FK_Gifts_Donors_IdDonor",
+                        column: x => x.IdDonor,
+                        principalTable: "Donors",
+                        principalColumn: "IdDonor",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Gifts_GiftCategories_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "GiftCategories",
+                        principalColumn: "IdGiftCategory",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Gifts_Packages_PackageIdPackage",
+                        column: x => x.PackageIdPackage,
+                        principalTable: "Packages",
+                        principalColumn: "IdPackage");
+                    table.ForeignKey(
+                        name: "FK_Gifts_Users_IdUser",
+                        column: x => x.IdUser,
+                        principalTable: "Users",
+                        principalColumn: "IdUser");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "OrdersOrders",
+                columns: table => new
+                {
+                    IdOrder = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    IdUser = table.Column<int>(type: "int", nullable: false),
+                    OrderDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    Price = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OrdersOrders", x => x.IdOrder);
+                    table.ForeignKey(
+                        name: "FK_OrdersOrders_Users_IdUser",
+                        column: x => x.IdUser,
+                        principalTable: "Users",
+                        principalColumn: "IdUser",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -90,86 +177,15 @@ namespace ChineseAuctionAPI.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_winners", x => x.IdWinner);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Gifts",
-                columns: table => new
-                {
-                    IdGift = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CategoryId = table.Column<int>(type: "int", nullable: false),
-                    Amount = table.Column<int>(type: "int", nullable: false),
-                    Image = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IdDonor = table.Column<int>(type: "int", nullable: false),
-                    DonorIdDonor = table.Column<int>(type: "int", nullable: false),
-                    IsDrawn = table.Column<bool>(type: "bit", nullable: false),
-                    Price = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Gifts", x => x.IdGift);
                     table.ForeignKey(
-                        name: "FK_Gifts_Donors_DonorIdDonor",
-                        column: x => x.DonorIdDonor,
-                        principalTable: "Donors",
-                        principalColumn: "IdDonor",
+                        name: "FK_winners_Gifts_IdGift",
+                        column: x => x.IdGift,
+                        principalTable: "Gifts",
+                        principalColumn: "IdGift",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Gifts_GiftCategories_CategoryId",
-                        column: x => x.CategoryId,
-                        principalTable: "GiftCategories",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Cards",
-                columns: table => new
-                {
-                    IdCard = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    IdGift = table.Column<int>(type: "int", nullable: false),
-                    IdBuyer = table.Column<int>(type: "int", nullable: false),
-                    Price = table.Column<int>(type: "int", nullable: false),
-                    PackageIdPackage = table.Column<int>(type: "int", nullable: true),
-                    UserIdUser = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Cards", x => x.IdCard);
-                    table.ForeignKey(
-                        name: "FK_Cards_Packages_PackageIdPackage",
-                        column: x => x.PackageIdPackage,
-                        principalTable: "Packages",
-                        principalColumn: "IdPackage");
-                    table.ForeignKey(
-                        name: "FK_Cards_Users_UserIdUser",
-                        column: x => x.UserIdUser,
-                        principalTable: "Users",
-                        principalColumn: "IdUser");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "OrdersOrders",
-                columns: table => new
-                {
-                    IdOrder = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    IdUser = table.Column<int>(type: "int", nullable: false),
-                    UserIdUser = table.Column<int>(type: "int", nullable: false),
-                    OrderDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsStatusDraft = table.Column<int>(type: "int", nullable: false),
-                    Price = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_OrdersOrders", x => x.IdOrder);
-                    table.ForeignKey(
-                        name: "FK_OrdersOrders_Users_UserIdUser",
-                        column: x => x.UserIdUser,
+                        name: "FK_winners_Users_IdUser",
+                        column: x => x.IdUser,
                         principalTable: "Users",
                         principalColumn: "IdUser",
                         onDelete: ReferentialAction.Cascade);
@@ -182,23 +198,21 @@ namespace ChineseAuctionAPI.Migrations
                     IdOrdersGift = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     IdGift = table.Column<int>(type: "int", nullable: false),
-                    GiftIdGift = table.Column<int>(type: "int", nullable: false),
                     IdOrder = table.Column<int>(type: "int", nullable: false),
-                    OrderIdOrder = table.Column<int>(type: "int", nullable: false),
                     Amount = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_OrdersGift", x => x.IdOrdersGift);
                     table.ForeignKey(
-                        name: "FK_OrdersGift_Gifts_GiftIdGift",
-                        column: x => x.GiftIdGift,
+                        name: "FK_OrdersGift_Gifts_IdGift",
+                        column: x => x.IdGift,
                         principalTable: "Gifts",
                         principalColumn: "IdGift",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_OrdersGift_OrdersOrders_OrderIdOrder",
-                        column: x => x.OrderIdOrder,
+                        name: "FK_OrdersGift_OrdersOrders_IdOrder",
+                        column: x => x.IdOrder,
                         principalTable: "OrdersOrders",
                         principalColumn: "IdOrder",
                         onDelete: ReferentialAction.Cascade);
@@ -233,11 +247,6 @@ namespace ChineseAuctionAPI.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Cards_PackageIdPackage",
-                table: "Cards",
-                column: "PackageIdPackage");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Cards_UserIdUser",
                 table: "Cards",
                 column: "UserIdUser");
@@ -248,31 +257,36 @@ namespace ChineseAuctionAPI.Migrations
                 column: "CategoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Gifts_DonorIdDonor",
+                name: "IX_Gifts_IdDonor",
                 table: "Gifts",
-                column: "DonorIdDonor");
+                column: "IdDonor");
 
             migrationBuilder.CreateIndex(
-                name: "IX_OrdersGift_GiftIdGift",
-                table: "OrdersGift",
-                column: "GiftIdGift");
+                name: "IX_Gifts_IdUser",
+                table: "Gifts",
+                column: "IdUser");
 
             migrationBuilder.CreateIndex(
-                name: "IX_OrdersGift_OrderIdOrder",
+                name: "IX_Gifts_PackageIdPackage",
+                table: "Gifts",
+                column: "PackageIdPackage");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrdersGift_IdGift",
                 table: "OrdersGift",
-                column: "OrderIdOrder");
+                column: "IdGift");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrdersGift_IdOrder",
+                table: "OrdersGift",
+                column: "IdOrder");
 
             migrationBuilder.CreateIndex(
                 name: "IX_OrdersOrders_IdUser",
                 table: "OrdersOrders",
                 column: "IdUser",
                 unique: true,
-                filter: "[IsStatusDraft] = 0");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_OrdersOrders_UserIdUser",
-                table: "OrdersOrders",
-                column: "UserIdUser");
+                filter: "[Status] = 0");
 
             migrationBuilder.CreateIndex(
                 name: "IX_OrdersPackage_IdPackage",
@@ -288,8 +302,17 @@ namespace ChineseAuctionAPI.Migrations
                 name: "IX_Users_Email",
                 table: "Users",
                 column: "Email",
-                unique: true,
-                filter: "[Email] IS NOT NULL");
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_winners_IdGift",
+                table: "winners",
+                column: "IdGift");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_winners_IdUser",
+                table: "winners",
+                column: "IdUser");
         }
 
         /// <inheritdoc />
@@ -308,19 +331,19 @@ namespace ChineseAuctionAPI.Migrations
                 name: "winners");
 
             migrationBuilder.DropTable(
-                name: "Gifts");
-
-            migrationBuilder.DropTable(
                 name: "OrdersOrders");
 
             migrationBuilder.DropTable(
-                name: "Packages");
+                name: "Gifts");
 
             migrationBuilder.DropTable(
                 name: "Donors");
 
             migrationBuilder.DropTable(
                 name: "GiftCategories");
+
+            migrationBuilder.DropTable(
+                name: "Packages");
 
             migrationBuilder.DropTable(
                 name: "Users");

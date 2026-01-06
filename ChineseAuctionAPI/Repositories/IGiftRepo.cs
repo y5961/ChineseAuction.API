@@ -1,4 +1,5 @@
-﻿using ChineseAuctionAPI.Models;
+﻿using System.Reflection;
+using ChineseAuctionAPI.Models;
 
 namespace ChineseAuctionAPI.Repositories
 {
@@ -9,6 +10,12 @@ namespace ChineseAuctionAPI.Repositories
         Task<Gift> AddAsync(Gift gift);
         Task<bool> UpdateAsync(Gift gift);
         Task<bool> DeleteAsync(int id);
-
+        Task<Gift?> GetGiftWithOrdersAndUsersAsync(int giftId);
+        Task AddWinnerAsync(Winner winner);
+        Task<IEnumerable<Gift?>> GetByNameDonor(string donor);
+        Task<IEnumerable<Gift?> >GetByNumOfBuyers(int buyers);
+        Task<IEnumerable<Gift?>> GetByNameGift(string word);
+        Task<IEnumerable<Gift?>> SortByPrice();
+        Task<IEnumerable<Gift?>> SortByAmountPeople();
     }
 }

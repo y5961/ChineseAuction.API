@@ -14,14 +14,14 @@ namespace ChineseAuctionAPI.DTOs
         [Range(1, 1000)]
         public int Amount { get; set; } = 1;
         public DateTime OrderDate { get; set; }= DateTime.Now;
-        public OrderStatus IsStatusDraft { get; set; } = OrderStatus.Draft;
+        public OrderStatus Status { get; set; } = OrderStatus.Draft;
         [MinLength(1)]
         public List<OrdersGiftDTO> OrdersGifts { get; set; } = new();
     }
     public class OrdersGiftDTO
     {
         [Required]
-        public GiftCategory Category { get; set; }
+        public string Category { get; set; }
         [Required]
         public string Name { get; set; }
         [Range(1, 1000)]
